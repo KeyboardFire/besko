@@ -28,8 +28,9 @@
 struct besko {
     SDL_Window *win;
     SDL_Surface *surf;
+    SDL_Renderer *rend;
     struct {
-        SDL_Surface *player;
+        SDL_Texture *player;
     } img;
 };
 

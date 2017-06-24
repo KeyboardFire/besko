@@ -27,15 +27,15 @@ int load_assets(struct besko *besko) {
     SDL_Surface *tmp;
     tmp = IMG_Load("assets/img/player.png");
     if (tmp) {
-        besko->img.player = SDL_ConvertSurface(tmp, besko->surf->format, 0);
+        besko->img.player = SDL_CreateTextureFromSurface(besko->rend, tmp);
         SDL_FreeSurface(tmp);
         if (!besko->img.player) {
             fprintf(stderr, "could not optimize player image\n(SDL error: %s)\n",
                     SDL_GetError());
             return 1;
         }
-        SDL_SetColorKey(besko->img.player, SDL_TRUE,
-                SDL_MapRGB(besko->surf->format, 0xff, 0x00, 0xff));
+        /* SDL_SetColorKey(besko->img.player, SDL_TRUE, */
+        /*         SDL_MapRGB(besko->surf->format, 0xff, 0x00, 0xff)); */
     } else {
         fprintf(stderr, "could not load player image\n(SDL/IMG error: %s)\n",
                 IMG_GetError());
@@ -66,20 +66,19 @@ struct besko *besko_init() {
             SCREEN_WIDTH,
             SCREEN_HEIGHT,
             SDL_WINDOW_SHOWN);
-    if (!besko->win) {
-        FAIL("window could not be created");
-    }
+    if (!besko->win) FAIL("window could not be created");
+
 
     // get surface
     besko->surf = SDL_GetWindowSurface(besko->win);
 
+    // create renderer
+    besko->rend = SDL_CreateRenderer(besko->win, -1, SDL_RENDERER_ACCELERATED);
+    if (!besko->rend) FAIL("could not create hardware renderer");
+    SDL_SetRenderDrawColor(besko->rend, 0x00, 0x00, 0x00, 0xff);
+
     // load assets
     if (load_assets(besko)) FAIL("failed to load assets");
-
-    // temporary
-    SDL_FillRect(besko->surf, NULL, SDL_MapRGB(besko->surf->format, 0, 0xff, 0));
-    SDL_BlitSurface(besko->img.player, NULL, besko->surf, NULL);
-    SDL_UpdateWindowSurface(besko->win);
 
     return besko;
 }
@@ -96,11 +95,17 @@ void besko_main_loop(struct besko *besko) {
                 break;
             }
         }
+
+        // temporary
+        SDL_RenderClear(besko->rend);
+        SDL_Rect dest = {100, 100, 40, 40};
+        SDL_RenderCopy(besko->rend, besko->img.player, NULL, &dest);
+        SDL_RenderPresent(besko->rend);
     }
 }
 
 void besko_destroy(struct besko *besko) {
-    SDL_FreeSurface(besko->img.player);
+    SDL_DestroyTexture(besko->img.player);
     SDL_DestroyWindow(besko->win);
     SDL_Quit();
     free(besko);
