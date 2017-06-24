@@ -21,5 +21,6 @@
 int main(int argc, char **argv) {
     struct besko *besko = besko_init();
     if (!besko) return 1;
+    besko_main_loop(besko);
     besko_destroy(besko);
 }

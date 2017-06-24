@@ -80,9 +80,23 @@ struct besko *besko_init() {
     SDL_FillRect(besko->surf, NULL, SDL_MapRGB(besko->surf->format, 0, 0xff, 0));
     SDL_BlitSurface(besko->img.player, NULL, besko->surf, NULL);
     SDL_UpdateWindowSurface(besko->win);
-    SDL_Delay(1000);
 
     return besko;
+}
+
+void besko_main_loop(struct besko *besko) {
+    SDL_Event e;
+    for (;;) {
+        while (SDL_PollEvent(&e)) {
+            switch (e.type) {
+            case SDL_QUIT:
+                return;
+            default:
+                // unknown event, ignore it
+                break;
+            }
+        }
+    }
 }
 
 void besko_destroy(struct besko *besko) {

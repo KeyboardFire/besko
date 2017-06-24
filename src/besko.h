@@ -34,6 +34,7 @@ struct besko {
 };
 
 struct besko *besko_init(void);
+void besko_main_loop(struct besko*);
 void besko_destroy(struct besko*);
 
 #endif
