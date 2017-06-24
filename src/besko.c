@@ -20,9 +20,33 @@
 
 #include "besko.h"
 
+/*
+ * load all the data in the assets directory into memory
+ */
+int load_assets(struct besko *besko) {
+    SDL_Surface *tmp;
+    tmp = IMG_Load("assets/img/player.png");
+    if (tmp) {
+        besko->img.player = SDL_ConvertSurface(tmp, besko->surf->format, 0);
+        SDL_FreeSurface(tmp);
+        if (!besko->img.player) {
+            fprintf(stderr, "could not optimize player image\n(SDL error: %s)\n",
+                    SDL_GetError());
+            return 1;
+        }
+        SDL_SetColorKey(besko->img.player, SDL_TRUE,
+                SDL_MapRGB(besko->surf->format, 0xff, 0x00, 0xff));
+    } else {
+        fprintf(stderr, "could not load player image\n(SDL/IMG error: %s)\n",
+                IMG_GetError());
+        return 1;
+    }
+    return 0;
+}
+
 #define FAIL(msg) do { \
-    free(besko); \
-    fprintf(stderr, msg "(SDL error: %s)\n", SDL_GetError()); \
+    besko_destroy(besko); \
+    fprintf(stderr, msg "\n(SDL error: %s)\n", SDL_GetError()); \
     return NULL; \
 } while (0)
 
@@ -49,8 +73,12 @@ struct besko *besko_init() {
     // get surface
     besko->surf = SDL_GetWindowSurface(besko->win);
 
+    // load assets
+    if (load_assets(besko)) FAIL("failed to load assets");
+
     // temporary
-    SDL_FillRect(besko->surf, NULL, SDL_MapRGB(besko->surf->format, 0xff, 0, 0));
+    SDL_FillRect(besko->surf, NULL, SDL_MapRGB(besko->surf->format, 0, 0xff, 0));
+    SDL_BlitSurface(besko->img.player, NULL, besko->surf, NULL);
     SDL_UpdateWindowSurface(besko->win);
     SDL_Delay(1000);
 
@@ -58,6 +86,7 @@ struct besko *besko_init() {
 }
 
 void besko_destroy(struct besko *besko) {
+    SDL_FreeSurface(besko->img.player);
     SDL_DestroyWindow(besko->win);
     SDL_Quit();
     free(besko);

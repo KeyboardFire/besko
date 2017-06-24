@@ -2,7 +2,7 @@ NAME = besko
 TARGET = bin/$(NAME)
 MANPAGE = $(NAME).1
 PREFIX ?= /usr/local
-LIBS = `pkg-config --libs sdl2`
+LIBS = -lSDL2 -lSDL2_image
 .PHONY: all debug release install clean
 
 all: $(TARGET)

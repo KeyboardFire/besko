@@ -20,6 +20,7 @@
 #define __BESKO_H__
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
@@ -27,6 +28,9 @@
 struct besko {
     SDL_Window *win;
     SDL_Surface *surf;
+    struct {
+        SDL_Surface *player;
+    } img;
 };
 
 struct besko *besko_init(void);
